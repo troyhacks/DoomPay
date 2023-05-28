@@ -20,19 +20,18 @@ WebServer server(80);
 
 IotWebConf iotWebConf(DEFAULT_SSID, &dnsServer, &server, DEFAULT_PASS);
 
-bool timeset = false;
-
 struct tm timeinfo;
-time_t epoch_ts;
-struct tm ts = {0};
-
-time_t curr_time = time(NULL);
-
+char ts_char[50] = {0};
 String last_id;
+bool timeset = false;
+float money_collected = 0.0;
+float last_money_collected = 0.0;
+uint16_t games_played = 0;
+String last_game_gmt;
 
 void setup() {
 
-  preferences.begin("doompay", false); // false = R/W
+  preferences.begin("doompay", false);
   
   Serial.begin(115200);
   delay(100);
@@ -70,14 +69,14 @@ void loop() {
       }
 
       Serial.println("Got the time from NTP");
-      // Now we can set the real timezone
 
       setenv("TZ","GMT0",1);
       tzset();
 
       getLocalTime(&timeinfo);
+
       Serial.print("GMT time is now: ");
-      Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S zone %Z %z ");
+      Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S zone %Z %z");
 
       timeset = true;
 
@@ -86,9 +85,6 @@ void loop() {
     }
 
     getLocalTime(&timeinfo);
-    
-    char ts_char[50] = {0};
-
     timeinfo.tm_min = timeinfo.tm_min - 5;
 
     strftime(ts_char,sizeof(ts_char),"%Y-%m-%dT%H:%M:%SZ", &timeinfo);   // 2023-05-27T04:05:10.039Z
@@ -107,7 +103,6 @@ void loop() {
 
     if (http.GET()) {
 
-      // Parse response
       DynamicJsonDocument doc(30000);
 
       // Use this for speed:
@@ -121,24 +116,30 @@ void loop() {
 
       http.end();
 
-      // Serial.println("Last ID: " + last_id);
-
       if (doc["payments"][0]) {
 
         if (last_id != doc["payments"][0]["id"].as<String>()) {
 
           // Put whatever trgger you want in this IF block.
-          
+
           Serial.println();
           Serial.println("*** PLAY DOOMBALL! ***");
           Serial.println();
 
+          games_played += 1;
+
           Serial.print("Tranaction ID : ");
           Serial.println(doc["payments"][0]["id"].as<String>());
+
           Serial.print("Timestamp     : ");
-          Serial.println(doc["payments"][0]["created_at"].as<String>());
+          last_game_gmt = doc["payments"][0]["created_at"].as<String>();
+          Serial.println(last_game_gmt);
+
           Serial.print("Amount        : $");
-          Serial.println(doc["payments"][0]["amount_money"]["amount"].as<float>()/100);
+          last_money_collected = doc["payments"][0]["amount_money"]["amount"].as<float>()/100;
+          Serial.println(last_money_collected);
+          money_collected += last_money_collected;
+
           Serial.print("Status        : ");
           Serial.println(doc["payments"][0]["status"].as<String>());
           Serial.println();
@@ -186,9 +187,21 @@ void handleRoot() {
   
   }
 
+  getLocalTime(&timeinfo);
+  strftime(ts_char,sizeof(ts_char),"%Y-%m-%dT%H:%M:%SZ", &timeinfo);   // 2023-05-27T04:05:10.039Z
+
   String s = "<!DOCTYPE html><html lang=\"en\"><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1, user-scalable=no\"/>";
-  s += "<title>IotWebConf 01 Minimal</title></head><body>";
-  s += "Go to <a href='config'>configure page</a> to change settings.";
+  s += "<title>DoomPay</title></head><body>";
+  s += "<h1>DoomPay Info</h1>";
+  s += "<table border=1 cellspacing=0 cellpadding=3>";
+  s += "<tr><td><b>Games Played Since Boot</b></td><td>"+String(games_played)+"</td></tr>";
+  s += "<tr><td><b>Money Collected Since Boot</b></td><td>$"+String(money_collected)+"</td></tr>";
+  s += "<tr><td><b>Last Money Collected</b></td><td>$"+String(last_money_collected)+"</td></tr>";
+  s += "<tr><td><b>Last Transacation ID</b></td><td>"+last_id+"</td></tr>";
+  s += "<tr><td><b>Last Transaction GMT</b></td><td>"+last_game_gmt+"</td></tr>";
+  s += "<tr><td><b>Current Time in GMT</b></td><td>"+String(ts_char)+"</td></tr>";
+  s += "</table>";
+  s += "<p>Go to <a href='config'>configure page</a> to change settings.</p>";
   s += "</body></html>\n";
 
   server.send(200, "text/html", s);
