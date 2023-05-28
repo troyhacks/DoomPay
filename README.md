@@ -22,7 +22,7 @@ Create your own my_config.h file with:
 
 PlatformIO project for ESP32. Can easily be adapted to Arduino IDE - just grab main.cpp and rename it to whatever.ino.
 
-Libraries:
+External libraries:
 
 * [bblanchon/ArduinoJson](https://github.com/bblanchon/ArduinoJson) 
 * [bblanchon/StreamUtils](https://github.com/bblanchon/StreamUtils) 
