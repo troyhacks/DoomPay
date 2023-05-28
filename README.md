@@ -8,6 +8,8 @@ Keeps track of the last payment ID in persistent storage in case of crash or reb
 
 Embedded webserver and SoftAP mode for setting new WiFi credentials on-the-fly. Could easily be expanded for a status page such as money collected or games/triggers played.
 
+Uses HTTPS, but does zero verification of remote server certificates. Don't use this for anything serious.
+
 Doesn't currently "do" anything except as described above. Adapt to suit your needs.
 
 Create your own my_config.h file with: 
@@ -15,9 +17,7 @@ Create your own my_config.h file with:
 ```
 #define DEFAULT_SSID "SSID for SoftAP Mode" // WiFi SSID for SoftAP mode, like "DoomPay"
 #define DEFAULT_PASS "Default SoftAP Mode Password" // Currently required to be changed the first time you use it. 
-#define SQUARE_AUTH "Bearer AAAAAAA....AAAAA" // Your secret key for Square API
+#define SQUARE_AUTH "Bearer AAAAAAA....AAAAA" // Your secret key for Square API. Keep this a secret.
 ```
-
-
 
 PlatformIO project for ESP32. Could easily be adapted to Arduino IDE.
