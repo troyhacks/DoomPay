@@ -20,4 +20,4 @@ Create your own my_config.h file with:
 #define SQUARE_AUTH "Bearer AAAAAAA....AAAAA" // Your secret key for Square API. Keep this a secret.
 ```
 
-PlatformIO project for ESP32. Could easily be adapted to Arduino IDE.
+PlatformIO project for ESP32. Can easily be adapted to Arduino IDE - just grab main.cpp and rename it to whatever.ino.
