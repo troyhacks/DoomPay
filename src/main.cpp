@@ -127,6 +127,8 @@ void loop() {
 
         if (last_id != doc["payments"][0]["id"].as<String>()) {
 
+          // Put whatever trgger you want in this IF block.
+          
           Serial.println();
           Serial.println("*** PLAY DOOMBALL! ***");
           Serial.println();
