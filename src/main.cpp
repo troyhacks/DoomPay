@@ -54,7 +54,11 @@ void setup() {
 
 void loop() {
 
-  iotWebConf.doLoop();
+  // Adapt this loop as required. This is checking payments constantly in a loop with delay()
+  // In an installation, this may be better as a separate loop called from the main loop
+  // without delays, using millis counted to trigger, etc.
+
+  iotWebConf.doLoop(); // may NOT want to do this if the gameplay is currently running? Do test this.
 
   if (iotWebConf.getState() == iotwebconf::OnLine) {
 
@@ -120,7 +124,7 @@ void loop() {
 
         if (last_id != doc["payments"][0]["id"].as<String>()) {
 
-          // Put whatever trgger you want in this IF block.
+          // Put whatever trgger you want in this if() block, likely after the debug.
 
           Serial.println();
           Serial.println("*** PLAY DOOMBALL! ***");
@@ -148,14 +152,14 @@ void loop() {
 
           preferences.putString("last_id",last_id); // save in case of crash or reboot
 
-          delay(10000);
+          delay(10000); // Adapt this as required, may not be needed if we're heading off to "playgame()"
 
         } else if (last_id == doc["payments"][0]["id"].as<String>()) {
 
           Serial.print("Already processed transaction: ");
           Serial.println(doc["payments"][0]["id"].as<String>());
 
-          delay(500);
+          delay(500); // Adapt this as required. May be a better as "has X millis passed, then run" in the overall loop
 
         }
 
@@ -163,7 +167,7 @@ void loop() {
 
         Serial.println("No recent transactions in the last 5 minutes.");
         
-        delay(500);
+        delay(500); // Adapt this as required. May be a better as "has X millis passed, then run" in the overall loop
 
       }
 
